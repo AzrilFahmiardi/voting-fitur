@@ -13,10 +13,11 @@ app.get("/", (req, res) => {
     res.status(200).send("OK");
 });
 
-app.post('/submit-form', async (req, res) => {
+app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
+    const has_voted = 0;
     try {
-        await db.query("INSERT INTO user (username, email, password) VALUES (?,?,?)", [username, email, password]);
+        await db.query("INSERT INTO user (username, email, password,has_voted) VALUES (?,?,?,?)", [username, email, password,has_voted]);
         res.status(200).json({ message: 'Form submitted successfully', data: { username, email, password } });
         console.log('Data received from frontend:', { username, email, password });
     } catch (error) {
