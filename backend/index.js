@@ -82,7 +82,7 @@ app.get('/auth/google', passport.authenticate('google', {
 
 // Callback setelah user login dengan Google
 app.get('/auth/google/callback', passport.authenticate('google', {
-    failureRedirect: '/login',
+    failureRedirect: 'http://localhost:5173/',
     successRedirect: 'http://localhost:5173/' // Redirect ke halaman setelah login berhasil
 }));
 
@@ -125,7 +125,7 @@ app.post('/vote', async (req, res) => {
 // Endpoint untuk mendapatkan data universitas
 app.get('/universitas-voting', async (req, res) => {
     try {
-        const [rows] = await db.query("SELECT * FROM universitas order by kode_univ");
+        const [rows] = await db.query("SELECT * FROM universitas");
         res.json(rows);
     } catch (error) {
         console.error('Error fetching universities:', error);
