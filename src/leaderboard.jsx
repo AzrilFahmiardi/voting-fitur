@@ -5,7 +5,6 @@ function Leaderboard({ universities, fetchUniversities }) {
         fetchUniversities();
     }, [fetchUniversities]);
 
-    // Mengurutkan universitas berdasarkan jumlah voting (has_voted) terbesar
     const sortedUniversities = [...universities].sort((a, b) => b.jumlah_voting - a.jumlah_voting);
 
     return (

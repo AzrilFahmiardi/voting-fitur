@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function Votinguniv({ universities, fetchUniversities }) {
+function Votinguniv({ universities, fetchUniversities ,onVoteSuccess}) {
     const [selectedUniversities, setSelectedUniversities] = useState([]);
 
     const handleCheckboxChange = (event) => {
@@ -28,9 +28,8 @@ function Votinguniv({ universities, fetchUniversities }) {
             await axios.post('http://localhost:5000/vote', { universities: selectedUniversities });
             setSelectedUniversities([]);
             alert('Voting submitted successfully!');
-
-            // Call fetchUniversities to refresh leaderboard
             fetchUniversities();
+            await onVoteSuccess();
         } catch (error) {
             console.error('Error submitting vote:', error);
             alert('Voting failed. Please try again.');

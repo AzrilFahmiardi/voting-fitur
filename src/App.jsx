@@ -8,11 +8,11 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [universities, setUniversities] = useState([]);
   const [user, setUser] = useState(null);
+  const [hasVoted, setHasVoted] = useState(false);
 
   // Konfigurasi axios untuk mengirim kredensial
   axios.defaults.withCredentials = true;
 
-  // Fungsi untuk memeriksa status login
   const checkLoginStatus = async () => {
     try {
       const response = await axios.get('http://localhost:5000/check-auth', { 
@@ -21,6 +21,13 @@ function App() {
       setIsLoggedIn(response.data.isAuthenticated);
       setUser(response.data.user);
       console.log('Response from check-auth:', response.data);
+
+      if (response.data.isAuthenticated) {
+        const voteStatus = await axios.get('http://localhost:5000/check-vote-status');
+        setHasVoted(voteStatus.data.hasVoted);
+        console.log('has voted : ',voteStatus.data.hasVoted);
+        
+      }
     } catch (error) {
       console.error('Error checking login status:', error);
       setIsLoggedIn(false);
@@ -28,7 +35,6 @@ function App() {
     }
   };
 
-  // Ambil data universitas
   const fetchUniversities = async () => {
     try {
       const response = await axios.get('http://localhost:5000/universitas-voting', {
@@ -53,17 +59,31 @@ function App() {
     console.log('isLoggedIn changed:', isLoggedIn);
   }, [isLoggedIn]);
 
+  const handleVoteSuccess = async () => {
+    setHasVoted(true);
+    await fetchUniversities();
+  };
+
 
   return (
     <div className="container mx-auto px-4">
       <Leaderboard universities={universities} fetchUniversities={fetchUniversities} />
       {isLoggedIn ? (
         <>
-          <Votinguniv 
-            universities={universities} 
-            fetchUniversities={fetchUniversities}
-            user={user}
-          />
+          {hasVoted ? (
+            <div className="mt-8 p-4 bg-green-100 rounded-lg text-center">
+              <h2 className="text-xl text-green-800">Thank you for voting!</h2>
+              <p className="text-green-600">You have already submitted your vote.</p>
+            </div>
+          ) : (
+            <Votinguniv 
+              universities={universities} 
+              fetchUniversities={fetchUniversities}
+              setHasVoted={setHasVoted}
+              onVoteSuccess={handleVoteSuccess}
+              user={user}
+            />
+          )}
           <button
             onClick={() => window.location.href = 'http://localhost:5000/logout'}
             className="mt-4 bg-red-500 text-white px-4 py-2 rounded"

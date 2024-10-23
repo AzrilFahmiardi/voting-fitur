@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors({
-    origin: "http://localhost:5173", // Your React app URL
+    origin: "http://localhost:5173",
     credentials: true
 }));
 
@@ -110,15 +110,45 @@ app.get("/", (req, res) => {
 
 // Route untuk voting
 app.post('/vote', async (req, res) => {
-    const { universities } = req.body;
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const connection = await db.getConnection();
+
     try {
-        for (const university of universities) {
-            await db.query("UPDATE universitas SET jumlah_voting = jumlah_voting + 1 WHERE kode_univ = ?", [university]);
+        await connection.beginTransaction();
+        
+        const [user] = await db.query('SELECT has_voted FROM user WHERE email = ?', [req.user.email]);
+        
+        if (user[0].has_voted === 1) {
+            return res.status(400).json({ message: 'You have already voted' });
         }
-        res.status(200).send('Voting successful');
+
+        const { universities } = req.body;
+        
+        for (const university of universities) {
+            await db.query(
+                "UPDATE universitas SET jumlah_voting = jumlah_voting + 1 WHERE kode_univ = ?", 
+                [university]
+            );
+        }
+
+        await connection.query(
+            "UPDATE user SET has_voted = 1 WHERE email = ?",
+            [req.user.email]
+        );
+
+        await connection.commit();
+        connection.release();
+        
+        res.status(200).json({ message: 'Voting successful' });
     } catch (error) {
+
+        await connection.rollback();
+        connection.release();
         console.error('Error updating votes:', error);
-        res.status(500).send('Error updating votes');
+        res.status(500).json({ message: 'Error updating votes' });
     }
 });
 
@@ -130,6 +160,20 @@ app.get('/universitas-voting', async (req, res) => {
     } catch (error) {
         console.error('Error fetching universities:', error);
         res.status(500).send('Error fetching universities');
+    }
+});
+
+app.get('/check-vote-status', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    try {
+        const [user] = await db.query('SELECT has_voted FROM user WHERE email = ?', [req.user.email]);
+        res.json({ hasVoted: user[0].has_voted === 1 });
+    } catch (error) {
+        console.error('Error checking vote status:', error);
+        res.status(500).json({ message: 'Error checking vote status' });
     }
 });
 
