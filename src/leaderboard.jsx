@@ -10,13 +10,13 @@ function Leaderboard({ universities, fetchUniversities }) {
     return (
         <div>
             <h1>LEADERBOARD KAMPUS</h1>
-            <ul>
+            <ol>
                 {sortedUniversities.map((university) => (
                     <li key={university.kode_univ}>
                         {university.kode_univ}: {university.nama} --- {university.jumlah_voting}
                     </li>
                 ))}
-            </ul>
+            </ol>
         </div>
     );
 }
