@@ -21,9 +21,9 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // Set to true if using HTTPS
+        secure: false, 
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 24 * 60 * 60 * 1000 
     }
 }));
 
@@ -60,12 +60,12 @@ passport.use(new GoogleStrategy({
     }
 }));
 
-// Serialize user ke session
+
 passport.serializeUser((user, done) => {
     done(null, user.email);
 });
 
-// Deserialize user dari session
+
 passport.deserializeUser(async (email, done) => {
     try {
         const [rows] = await db.query('SELECT * FROM user WHERE email = ?', [email]);
@@ -75,15 +75,15 @@ passport.deserializeUser(async (email, done) => {
     }
 });
 
-// Routes
+
 app.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
 
-// Callback setelah user login dengan Google
+
 app.get('/auth/google/callback', passport.authenticate('google', {
     failureRedirect: 'http://localhost:5173/',
-    successRedirect: 'http://localhost:5173/' // Redirect ke halaman setelah login berhasil
+    successRedirect: 'http://localhost:5173/' 
 }));
 
 app.get('/check-auth', (req, res) => {
@@ -96,11 +96,11 @@ app.get('/check-auth', (req, res) => {
     });
 });
 
-// Logout route
+
 app.get('/logout', (req, res) => {
     req.logout((err) => {
         if (err) return next(err);
-        res.redirect('http://localhost:5173/'); // Redirect ke halaman utama setelah logout
+        res.redirect('http://localhost:5173/'); 
     });
 });
 
@@ -108,7 +108,7 @@ app.get("/", (req, res) => {
     res.status(200).send("OK");
 });
 
-// Route untuk voting
+
 app.post('/vote', async (req, res) => {
     if (!req.isAuthenticated()) {
         return res.status(401).json({ message: 'Unauthorized' });
@@ -152,7 +152,7 @@ app.post('/vote', async (req, res) => {
     }
 });
 
-// Endpoint untuk mendapatkan data universitas
+
 app.get('/universitas-voting', async (req, res) => {
     try {
         const [rows] = await db.query("SELECT * FROM universitas");

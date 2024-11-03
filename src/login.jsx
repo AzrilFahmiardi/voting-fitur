@@ -2,7 +2,6 @@ import React from 'react';
 
 function Login() {
     const handleGoogleLogin = () => {
-        // Redirect ke endpoint auth Google
         window.location.href = 'http://localhost:5000/auth/google';
     };
 
